@@ -1,17 +1,19 @@
-import { QuestionAndAnswer } from "./types";
+import { ReactNode } from "react";
 
 type PropType = {
   open: boolean;
-  questionAndAnswer: QuestionAndAnswer;
+  title: string;
   index: number;
   onClick: (id: number) => void;
+  children: ReactNode;
 };
 
 export function AccordianItem({
   open,
-  questionAndAnswer,
+  title,
   index,
   onClick,
+  children,
 }: PropType) {
   return (
     <div
@@ -29,14 +31,12 @@ export function AccordianItem({
       </div>
       <div>
         <div className="flex justify-between text-xl items-center">
-          <span className={`${open ? "text-green-400" : ""}`}>
-            {questionAndAnswer.question}
-          </span>
+          <span className={`${open ? "text-green-400" : ""}`}>{title}</span>
           <span className="me-5  px-3 border-2 border-green-400">
             {open ? "-" : "+"}
           </span>
         </div>
-        {open && <div className="pt-3">{questionAndAnswer.answer}</div>}
+        {open && <div className="pt-3">{children}</div>}
       </div>
     </div>
   );

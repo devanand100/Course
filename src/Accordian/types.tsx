@@ -1,4 +1,6 @@
+import { ReactElement } from "react";
+
 export interface QuestionAndAnswer {
   question: string;
-  answer: string;
+  answer: string | ReactElement;
 }

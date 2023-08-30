@@ -28,6 +28,17 @@ export function Carausal() {
       answer:
         "State is a mechanism to store and manage dynamic data in React components.",
     },
+    {
+      question: "What is list in React?",
+      answer: (
+        <ul>
+          <li>one</li>
+          <li>Two</li>
+          <li>Three</li>
+          <li>Four</li>
+        </ul>
+      ),
+    },
   ];
 
   const [curIndex, setCurIndex] = useState(-1);
@@ -36,11 +47,13 @@ export function Carausal() {
     <div className="flex flex-col gap-6 m-4">
       {def.map((qa, index) => (
         <AccordianItem
-          questionAndAnswer={qa}
+          title={qa.question}
           open={curIndex === index}
           index={index}
           onClick={handleToggle}
-        />
+        >
+          {qa.answer}
+        </AccordianItem>
       ))}
     </div>
   );
