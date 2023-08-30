@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { itemType } from "./types/type";
 
 export function Form({ addItems }: { addItems: (item: itemType) => void }) {
@@ -41,7 +41,7 @@ export function Form({ addItems }: { addItems: (item: itemType) => void }) {
     </form>
   );
 
-  function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLElement>) {
     e.preventDefault();
     if (name.length <= 0) {
       return;
