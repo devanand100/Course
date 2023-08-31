@@ -18,7 +18,9 @@ function SelectBox({ onSelect, options, children, selected }: propType) {
         onChange={(e) => onSelect(Number(e.target.value))}
       >
         {options.map((opt) => (
-          <option value={opt.value}>{opt.text}</option>
+          <option value={opt.value} key={opt.value}>
+            {opt.text}
+          </option>
         ))}
       </select>
     </div>
