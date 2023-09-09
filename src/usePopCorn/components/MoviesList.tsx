@@ -2,13 +2,14 @@ import { MovieType } from "../types";
 
 type MoviesListProp = {
   movies: MovieType[];
+  onSelectMovie: (arg0: string) => void;
 };
 
-export function MovieList({ movies }: MoviesListProp) {
+export function MovieList({ movies, onSelectMovie }: MoviesListProp) {
   return (
     <ul className="list">
       {movies?.map((movie) => (
-        <Movie movie={movie} />
+        <Movie movie={movie} onSelectMovie={onSelectMovie} key={movie.imdbID} />
       ))}
     </ul>
   );
@@ -16,10 +17,15 @@ export function MovieList({ movies }: MoviesListProp) {
 
 type MovieProp = {
   movie: MovieType;
+  onSelectMovie: (arg0: string) => void;
 };
-export function Movie({ movie }: MovieProp) {
+export function Movie({ movie, onSelectMovie }: MovieProp) {
   return (
-    <li key={movie.imdbID}>
+    <li
+      className="cursor-pointer"
+      key={movie.imdbID}
+      onClick={() => onSelectMovie(movie.imdbID)}
+    >
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>

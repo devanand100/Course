@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavBar, { SearchBar } from "./components/NavBar";
 import Main from "./components/main";
 import { SearchResult } from "./components/NavBar";
@@ -6,73 +6,120 @@ import { MovieList } from "./components/MoviesList";
 import Box from "./components/Box";
 import { SummaryBox } from "./components/SummaryBox";
 import { WatchedMoviesList } from "./components/WatchedMoviesList";
+import MovieDetail from "./components/MovieDetail";
+import { MovieType, WatchedType } from "./types";
+
+export const KEY = "df8e05f4";
+export const HOSTMOVIE = `http://www.omdbapi.com/?apikey=${KEY}&`;
 
 function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState<MovieType[] | null>([]);
+  const [watched, setWatched] = useState<WatchedType[]>(() =>
+    JSON.parse(localStorage.getItem("watched") ?? "[]")
+  );
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+
+  useEffect(() => {
+    let timer: number;
+    if (query.length > 0) {
+      setError("");
+      setLoading(true);
+      timer = setTimeout(movieData, 1000);
+    } else {
+      setMovies([]);
+      setError("");
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched));
+  }, [watched]);
 
   return (
     <>
       <NavBar>
-        <SearchResult movies={movies} />
-        <SearchBar />
+        {query.length > 0 && movies && (
+          <SearchResult movies={movies} loading={loading} />
+        )}
+        <SearchBar
+          query={query}
+          setQuery={(query: string) => {
+            setQuery(query);
+            setSelectedId("");
+          }}
+        />
       </NavBar>
       <Main>
         <Box>
-          <MovieList movies={movies} />
+          {query.length === 0 && !error && !loading && (
+            <p className="text-3xl text-center pt-10">Enter Search Query</p>
+          )}
+          {error && <p className="text-3xl text-center pt-10">{error}</p>}
+          {loading && !error && (
+            <h1 className="text-3xl text-center pt-10">Loading....</h1>
+          )}
+          {!loading && !error && movies && (
+            <MovieList
+              movies={movies}
+              onSelectMovie={(id: string) => setSelectedId(id)}
+            />
+          )}
         </Box>
         <Box>
-          <SummaryBox watched={watched} />
-          <WatchedMoviesList watched={watched} />
+          {selectedId ? (
+            <MovieDetail
+              id={selectedId}
+              onClose={() => setSelectedId("")}
+              watched={watched}
+              handleAdd={handleAdd}
+              key={selectedId}
+            />
+          ) : (
+            <>
+              <SummaryBox watched={watched} />
+              <WatchedMoviesList watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
   );
+
+  function handleAdd(data: WatchedType) {
+    setWatched([...watched, data]);
+  }
+
+  async function movieData() {
+    try {
+      setError("");
+      const res = await fetch(`${HOSTMOVIE}s=${query}`);
+      if (!res.ok) {
+        throw new Error("Something went wrong ,Try again");
+      }
+      const data = await res.json();
+      setLoading(false);
+
+      if ("Search" in data) {
+        setMovies(data.Search);
+      } else {
+        setMovies([]);
+        throw new Error("0 Movies Found");
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error?.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 }
 
-const tempMovieData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt0133093",
-    Title: "The Matrix",
-    Year: "1999",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt6751668",
-    Title: "Parasite",
-    Year: "2019",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-  },
-];
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
 export default App;

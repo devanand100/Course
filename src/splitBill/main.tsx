@@ -36,8 +36,6 @@ function Main() {
     setFriends((friends) =>
       friends.map((fr) => {
         if (fr.id === updatedFriend?.id) {
-          console.log("..................");
-          console.log({ ...fr, balance: updatedFriend.balance });
 
           return { ...fr, balance: updatedFriend.balance };
         }
